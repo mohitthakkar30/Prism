@@ -1,0 +1,11 @@
+.nav{
+  z-index:100;
+  flex: 1;
+}
+.navLink {
+  @apply bg-white block h-px absolute bottom-0 left-0 w-full;
+  @apply table-cell relative cursor-pointer flex items-center h-full py-0 px-4 no-underline text-xl font-semibold text-red-400;
+  font-family: "Varela Round", "Comfortaa", "sans serif";
+  content: "";
+  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+}
