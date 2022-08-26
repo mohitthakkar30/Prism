@@ -1,54 +1,6 @@
 import React from 'react'
-import {Connection,clusterApiUrl,PublicKey, Transaction, SystemProgram,
-   LAMPORTS_PER_SOL} from "@solana/web3.js"
-import * as web3 from "@solana/web3.js"
-import * as nacl from "tweetnacl";
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-function HeroSection() {
-  const burnToken = async () => {
 
-      const provider = window.solana;
-      const sender = await provider.connect()
-      console.log(sender.publicKey.toString());
-      
-      const receiver = new PublicKey("5kbB2Q8mdwobZY4yXLvC3nNZfZ6xFvgUzRR4w7sGsGcp");
-      const sol = 0.1;
-      const connection = new Connection(
-        clusterApiUrl('devnet'),
-        "confirmed"
-      );
-  
-      let signature = '';
-      try {
-        // const transaction = new Transaction();
-        console.log("sender.publicKey =>" , sender.publicKey.toString());
-        const addr = sender.publicKey.toString()
-        const senderAddress = new PublicKey(addr)
-        const recentBlockhash = (await connection.getLatestBlockhash('finalized')).blockhash;
-        const transaction = new Transaction().add(
-              SystemProgram.transfer({
-                    fromPubkey: senderAddress, //publicKey,
-                    toPubkey: receiver,
-                    lamports: 1_000_000_000 * sol,
-                    
-                })
-            );
-            transaction.recentBlockhash = recentBlockhash;
-            transaction.feePayer = senderAddress
-
-            let sign = await window.solana.signTransaction(transaction);
-            let signature = await connection.sendRawTransaction(sign.serialize());
-            const confirmed = await connection.confirmTransaction(signature);
-          
-          console.log("SIGNATURE", signature);
-      } catch (error) {
-          console.log('error', `Transaction failed! ${error?.message}`, signature);
-          return;
-      }   
-  
-  }
-  
-
+function HeroSection({burnToken, burnLoading, burnTokenBalance}) {
 return (
 <div class="relative bg-white overflow-hidden">
   <div class="max-w-7xl mx-auto">
@@ -91,14 +43,15 @@ return (
             <span class="block text-indigo-600 xl:inline"> Token</span>
           </h1>
           <p id='showBalance' class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-            Total Tokens Burn = 1.2 SOL 
+            {`Total Tokens Burn = ${burnTokenBalance} SOL`}
             </p>
           <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
             <div class="rounded-md shadow">
               <button class="w-full flex items-center justify-center px-8 py-3 border border-transparent 
               text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
               id="burnToken" onClick={burnToken}>
-                Burn Tokens</button>
+                {burnLoading ? 'loading...' : 'Burn Tokens'}
+              </button>
             </div>
             <div class="mt-3 sm:mt-0 sm:ml-3">
               <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10">Know More</a>
