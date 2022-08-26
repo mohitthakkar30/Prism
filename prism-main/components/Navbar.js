@@ -1,10 +1,20 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import Link from "next/link"
 import styles from "../styles/navbar.module.css"
 import * as web3 from "@solana/web3.js"
 
  function Navbar() {
-   const connectWallet=async()=>{
+
+
+  const provider = window.solana;
+  var connection = new web3.Connection(
+    web3.clusterApiUrl("devnet"),
+    "confirmed"
+  );;
+  const [balance, setBalance] = useState()
+  console.log("=>",balance);
+  
+  const connectWallet=async()=>{
     const isPhantomInstalled = window.solana && window.solana.isPhantom;
   if (isPhantomInstalled) {
     if ("solana" in window) {
@@ -15,11 +25,9 @@ import * as web3 from "@solana/web3.js"
           try {
             const account = await window.solana.connect();
             const myAddress = account.publicKey.toString();       
-            var connection = new web3.Connection(
-              web3.clusterApiUrl("devnet"),
-              "confirmed"
-            );
+            
              connection.getBalance(provider.publicKey).then(function (value) {
+               setBalance(value/10**9)
               document.getElementById('btnConnect').innerHTML = value / 10**9 + "SOL";
             });
           }
@@ -30,6 +38,10 @@ import * as web3 from "@solana/web3.js"
       }
     }
   }
+
+  useEffect(() => {
+    
+  }, [balance])
 
  
   return ( 

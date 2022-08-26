@@ -3,66 +3,51 @@ import {Connection,clusterApiUrl,PublicKey, Transaction, SystemProgram,
    LAMPORTS_PER_SOL} from "@solana/web3.js"
 import * as web3 from "@solana/web3.js"
 import * as nacl from "tweetnacl";
-
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 function HeroSection() {
-const burnToken = async () => {
+  const burnToken = async () => {
 
-  console.log(" =>",web3);
-    const provider = window.solana;
-    const sender = await provider.connect()
-    console.log(sender.publicKey.toString());
-    
-    const receiver = new PublicKey("5kbB2Q8mdwobZY4yXLvC3nNZfZ6xFvgUzRR4w7sGsGcp");
-    const sol = 0.1;
-    const connection = new Connection(
-      clusterApiUrl('devnet'),
-      "confirmed"
-    );
+      const provider = window.solana;
+      const sender = await provider.connect()
+      console.log(sender.publicKey.toString());
+      
+      const receiver = new PublicKey("5kbB2Q8mdwobZY4yXLvC3nNZfZ6xFvgUzRR4w7sGsGcp");
+      const sol = 0.1;
+      const connection = new Connection(
+        clusterApiUrl('devnet'),
+        "confirmed"
+      );
+  
+      let signature = '';
+      try {
+        // const transaction = new Transaction();
+        console.log("sender.publicKey =>" , sender.publicKey.toString());
+        const addr = sender.publicKey.toString()
+        const senderAddress = new PublicKey(addr)
+        const recentBlockhash = (await connection.getLatestBlockhash('finalized')).blockhash;
+        const transaction = new Transaction().add(
+              SystemProgram.transfer({
+                    fromPubkey: senderAddress, //publicKey,
+                    toPubkey: receiver,
+                    lamports: 1_000_000_000 * sol,
+                    
+                })
+            );
+            transaction.recentBlockhash = recentBlockhash;
+            transaction.feePayer = senderAddress
 
-    let signature = '';
-    try {
-      // const transaction = new Transaction();
-      console.log("sender.publicKey =>" , sender.publicKey.toString());
-      const addr = sender.publicKey.toString()
-      const senderAddress = new PublicKey(addr)
-      const recentBlockhash = (await connection.getLatestBlockhash('finalized')).blockhash;
-      // console.log("Recent ==> ", recentBlockhash);
-      const transaction = new Transaction().add(
-            SystemProgram.transfer({
-                  fromPubkey: senderAddress, //publicKey,
-                  toPubkey: receiver,
-                  lamports: 1_000_000 * sol,
-                  
-              })
-          );
-          // const blockhash = await connection.getLatestBlockhash().blockhash;
-          console.log(recentBlockhash);
-          console.log(senderAddress);
-          transaction.recentBlockhash = recentBlockhash;
-          transaction.feePayer = senderAddress
-
-          const signer = provider
-          const signature = await web3.sendAndConfirmTransaction(
-            connection,
-            transaction,
-            signer
-        );
-        console.log("SIGNATURE", signature);
-          // const signedTransaction = await provider.signTransaction(transaction);
-          // const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-        //  await web3.confirmTransaction(signature, 'confirmed');
-        // console.log(signature);
-        // notify({ type: 'success', message: 'Transaction successful!', txid: signature });
-    } catch (error) {
-        // notify({ type: 'error', message: `Transaction failed!`, description: error?.message, txid: signature });
-        console.log('error', `Transaction failed! ${error?.message}`, signature);
-        return;
-    }
-
-
-   
-
-}
+            let sign = await window.solana.signTransaction(transaction);
+            let signature = await connection.sendRawTransaction(sign.serialize());
+            const confirmed = await connection.confirmTransaction(signature);
+          
+          console.log("SIGNATURE", signature);
+      } catch (error) {
+          console.log('error', `Transaction failed! ${error?.message}`, signature);
+          return;
+      }   
+  
+  }
+  
 
 return (
 <div class="relative bg-white overflow-hidden">
@@ -105,7 +90,9 @@ return (
             <span class="block xl:inline">Burn Your</span>
             <span class="block text-indigo-600 xl:inline"> Token</span>
           </h1>
-          <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat fugiat aliqua.</p>
+          <p id='showBalance' class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+            Total Tokens Burn = 1.2 SOL 
+            </p>
           <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
             <div class="rounded-md shadow">
               <button class="w-full flex items-center justify-center px-8 py-3 border border-transparent 
